@@ -4,6 +4,7 @@
     package="com.ivy.wallet">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -18,11 +19,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />  <!--  Show activity over the lockscreen  -->
-
+    <!--  Show activity over the lockscreen  -->
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
-    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:name=".IvyAndroidApp"
@@ -38,10 +37,10 @@
         tools:ignore="LockedOrientationActivity">
 
         <activity
-            android:name=".ui.RootActivity"
+            android:name=".RootActivity"
+            android:exported="true"
             android:screenOrientation="portrait"
-            android:hardwareAccelerated="true"
-            android:windowSoftInputMode="adjustResize|stateAlwaysHidden" >
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -50,8 +49,10 @@
                 <action android:name="ivy.wallet.intent.action.add_transaction" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts"/>
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
 
         <!-- It fixes HiltWorker injection for newer WorkManager versions -->
@@ -59,15 +60,42 @@
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             tools:node="remove" />
-<!--        make sures locale changes are persisted -->
-        <service
-            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
-            android:enabled="false"
-            android:exported="false">
+
+        <receiver
+            android:name="com.ivy.widget.transaction.AddTransactionWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
             <meta-data
-                android:name="autoStoreLocales"
-                android:value="true" />
-        </service>
+                android:name="android.appwidget.provider"
+                android:resource="@xml/add_transaction_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name="com.ivy.widget.transaction.AddTransactionWidgetCompact"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/add_transaction_widget_compact_info" />
+        </receiver>
+
+        <receiver
+            android:name="com.ivy.widget.balance.WalletBalanceWidgetReceiver"
+            android:enabled="@bool/glance_appwidget_available"
+            android:exported="true"
+            android:label="@string/wallet_balance"
+            tools:ignore="instantiatable">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/wallet_balance_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

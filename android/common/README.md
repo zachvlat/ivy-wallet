@@ -1,3 +1,0 @@
-# Android Base
-
-Common Android
